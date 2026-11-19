@@ -1,43 +1,60 @@
-// Vice Coast Cover Studio — the entry program (Node 22, standard library only).
+// Neon Vice Cover Studio — entry program for gta6-cover-art-01 (Node 22, stdlib only).
 //
-// The app itself is plain static files under app/: index.html plus its ES
-// modules, no library and no network request. This program hands the entry in:
-// it copies app/ and screenshots/ from beside this file to /output and writes
-// /output/dossier.json, the summary the judge reads, with the vendored
-// make.fun library (vendor/makefun-app.ts, the kit's copy, unchanged).
+// The actual product is the static web app in app/: an offline cover-art maker that
+// turns local photos into multi-panel GTA-style posters. This program only hands the
+// app in: it mirrors app/ and screenshots/ into the output directory and writes
+// dossier.json with the vendored make.fun library, exactly as the scorer expects.
 //
-// Serve the app locally with `node serve.ts`, then open http://localhost:8080.
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// Local run:  mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// Local app:  node serve.ts   ->  http://localhost:8080
 
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
-const here = fileURLToPath(new URL('.', import.meta.url));
-const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const repoRoot = fileURLToPath(new URL('.', import.meta.url));
+const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-mkdirSync(out, { recursive: true });
-cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
-// Clear a stale screenshots folder first, so a re-run never keeps a
-// screenshot this repository no longer holds: the two runs must agree.
-rmSync(join(out, 'screenshots'), { recursive: true, force: true });
-mkdirSync(join(out, 'screenshots'), { recursive: true });
-if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
+// Gate caps from the kit's reference/gate.json. text_max_bytes shapes the dossier
+// bytes; the rest make buildDossier refuse anything the scorer would refuse.
+const GATE_LIMITS = {
+  text_max_bytes: 163840,
+  screenshots: { max: 4, max_bytes: 262144 },
+  app_max_files: 993,
+  app_max_bytes: 50331648,
+  app_path_max_bytes: 1000,
+};
 
-// The scorer's own caps (reference/gate.json): only text_max_bytes shapes the
-// bytes; the others refuse an entry the scorer would refuse (more than 4
-// screenshots or one over 256 KiB; more than 993 files in app/ or 48 MiB of
-// app files, in all, or a path under app/ over 1000 bytes: app/ counts beside
-// /output's own 1000-entry cap, its screenshots/ and dossier.json).
-writeFileSync(
-  join(out, 'dossier.json'),
-  buildDossier(out, {
-    text_max_bytes: 163840,
-    screenshots: { max: 4, max_bytes: 262144 },
-    app_max_files: 993,
-    app_max_bytes: 50331648,
-    app_path_max_bytes: 1000,
-  }),
+function copyTree(from: string, to: string): void {
+  mkdirSync(to, { recursive: true });
+  if (existsSync(from)) cpSync(from, to, { recursive: true });
+}
+
+function countFiles(dir: string): number {
+  let total = 0;
+  const walk = (d: string): void => {
+    for (const name of readdirSync(d)) {
+      const p = join(d, name);
+      if (statSync(p).isDirectory()) walk(p);
+      else total++;
+    }
+  };
+  if (existsSync(dir)) walk(dir);
+  return total;
+}
+
+if (!existsSync(join(repoRoot, 'app', 'index.html'))) {
+  throw new Error('app/index.html is missing — nothing to hand in');
+}
+
+copyTree(join(repoRoot, 'app'), join(outputDir, 'app'));
+copyTree(join(repoRoot, 'screenshots'), join(outputDir, 'screenshots'));
+
+const dossier = buildDossier(outputDir, GATE_LIMITS);
+writeFileSync(join(outputDir, 'dossier.json'), dossier);
+
+console.log(
+  `Neon Vice Cover Studio handed in: ${countFiles(join(outputDir, 'app'))} app files, ` +
+    `${countFiles(join(outputDir, 'screenshots'))} screenshots, dossier ${Buffer.byteLength(dossier)} bytes -> ${outputDir}`,
 );

@@ -1,0 +1,62 @@
+/* Vice Coast Cover Studio — a dark neon editor shell around the cover canvas. */
+html, body { margin: 0; min-height: 100%; background: #14060f; color: #f5eef2; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+* { box-sizing: border-box; }
+
+.app { display: flex; gap: 28px; align-items: flex-start; justify-content: center; padding: 24px; min-height: 100vh; }
+
+/* ---- Controls column ---- */
+.controls { display: flex; flex-direction: column; gap: 16px; width: 320px; flex-shrink: 0; }
+.controls header h1 { margin: 0; font-size: 30px; line-height: 1.05; font-style: italic; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(100deg, #ffe259, #ff7a18 45%, #ff2e88); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.controls header h1 span { display: block; font-size: 19px; letter-spacing: 2px; }
+.controls header p { margin: 8px 0 0; color: #c9a8bd; font-size: 13px; }
+
+fieldset { margin: 0; padding: 14px; border: 1px solid #4a2340; border-radius: 10px; background: #1e0a18; display: flex; flex-direction: column; gap: 10px; }
+legend { font-weight: 800; font-size: 13px; letter-spacing: 0.4px; color: #ffb3d9; padding: 0 6px; }
+label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 13px; }
+.hint { margin: 0; font-size: 12px; color: #a98ba0; font-weight: 400; }
+
+input[type=text], select { font: inherit; color: #f5eef2; padding: 9px 10px; border: 1px solid #5c2a4d; border-radius: 7px; background: #2b1030; }
+input[type=text]:focus, select:focus { outline: 2px solid #ff2e88; outline-offset: 1px; }
+input[type=file] { display: none; }
+.file-btn { display: block; text-align: center; padding: 10px; border-radius: 7px; background: #ff2e88; color: #fff; font-weight: 800; cursor: pointer; }
+.file-btn:hover { background: #ff4a9c; }
+
+button { font: inherit; font-weight: 700; padding: 9px 12px; border: 0; border-radius: 7px; background: #3a1530; color: #ffd9ec; cursor: pointer; }
+button:hover { background: #4d1c40; }
+button.primary { background: linear-gradient(100deg, #ff7a18, #ff2e88); color: #fff; flex: 1; }
+button.primary:hover { filter: brightness(1.12); }
+button.ghost { background: transparent; border: 1px solid #5c2a4d; }
+button.active { background: #ff2e88; color: #fff; }
+.action-row { display: flex; gap: 10px; }
+.sample-row { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #c9a8bd; }
+.sample-row button { padding: 6px 10px; font-size: 13px; }
+
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.thumb { padding: 7px 10px; font-size: 13px; }
+.thumb.empty { opacity: 0.45; cursor: default; }
+.panel-row, .grade-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.panel-btn, .grade-btn { padding: 7px 10px; font-size: 13px; }
+.zoom-row { display: flex; gap: 10px; align-items: center; }
+.zoom-row input { flex: 1; accent-color: #ff2e88; }
+.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 600; }
+.check input { accent-color: #ff2e88; width: 16px; height: 16px; }
+#status { margin: 0; min-height: 1.2em; font-size: 13px; color: #7df9ff; }
+
+/* ---- Preview stage ---- */
+.stage { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; position: sticky; top: 24px; }
+.stage canvas { max-width: 100%; max-height: calc(100vh - 90px); width: auto; height: auto; box-shadow: 0 12px 44px rgba(0, 0, 0, 0.55), 0 0 0 1px #4a2340; cursor: grab; touch-action: none; }
+.stage canvas:active { cursor: grabbing; }
+.stage-hint { margin: 0; font-size: 12px; color: #a98ba0; }
+
+/* ---- Screenshot scenes ---- */
+body.shot-cover .controls, body.shot-cover .stage-hint { display: none; }
+body.shot-cover .app { padding: 0; gap: 0; }
+body.shot-cover .stage { position: static; width: 100%; }
+body.shot-cover canvas { max-width: 100vw; max-height: 100vh; width: 100vw; height: 100vh; box-shadow: none; }
+body.shot-editor .stage canvas { max-height: calc(100vh - 90px); }
+
+@media (max-width: 900px) {
+  .app { flex-direction: column; }
+  .controls { width: 100%; }
+  .stage { position: static; width: 100%; }
+}

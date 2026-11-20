@@ -1,83 +1,124 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vice Coast Cover Studio</title>
-<link rel="stylesheet" href="./style.css">
+<title>Neon Vice Cover Studio — GTA-style cover art maker</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="app">
-  <section class="controls" aria-label="Cover controls">
-    <header>
-      <h1>Vice Coast <span>Cover Studio</span></h1>
-      <p>Your photos, cut into a Vice City poster. Nothing leaves your machine.</p>
-    </header>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">NV</span>
+    <div>
+      <h1>Neon Vice Cover Studio</h1>
+      <p>Turn your photos into GTA-style cover art. Runs fully offline — photos never leave this machine.</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button id="btn-random" type="button" class="ghost">Shuffle look</button>
+    <button id="btn-export" type="button" class="primary">Export PNG</button>
+  </div>
+</header>
 
-    <fieldset>
-      <legend>1 · Photos — up to 4</legend>
-      <label class="file-btn">Add a photo from your machine
-        <input id="photo" type="file" accept="image/*">
-      </label>
-      <div class="sample-row">
-        <span>Or try a sample:</span>
-        <button id="sample-boulevard" type="button">Boulevard</button>
-        <button id="sample-pier" type="button">Pier</button>
-      </div>
-      <div id="thumbs" class="thumbs" aria-label="Loaded photos"></div>
-      <button id="fill-all" type="button" class="ghost">Isi semua panel dengan foto ini</button>
-      <p class="hint">Click a thumbnail to put that photo in the selected panel. Click the preview to pick a panel.</p>
-    </fieldset>
-
-    <fieldset>
-      <legend>2 · Layout</legend>
-      <label>Panels
-        <select id="layout"></select>
-      </label>
-      <div id="panels" class="panel-row" aria-label="Pick a panel to crop"></div>
-      <label>Zoom the selected panel
-        <span class="zoom-row">
-          <input id="zoom" type="range" min="1" max="3" step="0.1" value="1">
-          <output id="zoom-val">1.0x</output>
-        </span>
-      </label>
-      <p class="hint">Drag the preview to slide the photo inside its panel.</p>
-    </fieldset>
-
-    <fieldset>
-      <legend>3 · Colour grade</legend>
-      <div id="grades" class="grade-row"></div>
-      <label class="check"><input id="halftone" type="checkbox" checked> Halftone print dots</label>
-    </fieldset>
-
-    <fieldset>
-      <legend>4 · Lettering</legend>
-      <label>Title
-        <input id="title" type="text" maxlength="30" value="Sunset Heist">
-      </label>
-      <label>Subtitle (neon script)
-        <input id="subtitle" type="text" maxlength="40" value="vice coast nights">
-      </label>
-    </fieldset>
-
-    <fieldset>
-      <legend>5 · Export</legend>
-      <label>Post size
-        <select id="size"></select>
-      </label>
-      <div class="action-row">
-        <button id="export" type="button" class="primary">Export PNG</button>
-        <button id="random" type="button" class="ghost">Acak</button>
-      </div>
-      <p id="status" role="status"></p>
-    </fieldset>
+<main class="layout">
+  <section class="stage-wrap">
+    <div class="stage-head">
+      <span id="stage-label">Live preview</span>
+      <span id="stage-size" class="stage-size">1080 × 1080</span>
+    </div>
+    <div id="stage" class="stage">
+      <canvas id="preview" width="1080" height="1080"></canvas>
+      <div id="drop-hint" class="drop-hint">Drop photos here, or use “Add photos”</div>
+    </div>
+    <p class="stage-tip">Click a panel to select it, drag to reposition the photo, scroll to zoom.</p>
   </section>
 
-  <section class="stage" aria-label="Cover preview">
-    <canvas id="cover" width="1920" height="1080" aria-label="The cover preview"></canvas>
-    <p class="stage-hint">Live preview — what you see is the PNG you get.</p>
-  </section>
+  <aside class="panel">
+    <div class="group">
+      <h2>1 · Photos</h2>
+      <div class="row">
+        <label class="file-btn">
+          Add photos
+          <input id="file-input" type="file" accept="image/*" multiple hidden>
+        </label>
+        <button id="btn-sample-boulevard" type="button" class="ghost">Sample: Boulevard</button>
+        <button id="btn-sample-pier" type="button" class="ghost">Sample: Pier</button>
+      </div>
+      <div id="photo-tray" class="photo-tray"></div>
+      <div class="row small">
+        <button id="btn-fill-all" type="button" class="ghost">Fill every panel with selected photo</button>
+        <button id="btn-spread" type="button" class="ghost">Spread photos across panels</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>2 · Layout &amp; size</h2>
+      <label class="field">Panel layout
+        <select id="sel-layout">
+          <option value="grid9">Cover grid — 8 panels + title block</option>
+          <option value="hero3">Hero + 3</option>
+          <option value="quad">Four panels</option>
+          <option value="strip">Film strip — 3 tall panels</option>
+          <option value="duo">Two wide panels</option>
+          <option value="bleed">Full bleed — one photo</option>
+        </select>
+      </label>
+      <label class="field">Post size
+        <select id="sel-size">
+          <option value="square">Square · 1080 × 1080</option>
+          <option value="portrait">Portrait · 1080 × 1350</option>
+          <option value="landscape">Landscape · 1920 × 1080</option>
+          <option value="story">Story · 1080 × 1920</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="group">
+      <h2>3 · Colour grade</h2>
+      <div id="grade-row" class="grade-row"></div>
+      <label class="field">Grade strength
+        <input id="rng-grade" type="range" min="0" max="100" value="80">
+      </label>
+      <label class="field">Film grain
+        <input id="rng-grain" type="range" min="0" max="100" value="35">
+      </label>
+    </div>
+
+    <div class="group">
+      <h2>4 · Lettering</h2>
+      <label class="field">Title
+        <input id="txt-title" type="text" value="NEON VICE" maxlength="28">
+      </label>
+      <label class="field">Subtitle
+        <input id="txt-subtitle" type="text" value="a cover story" maxlength="40">
+      </label>
+      <label class="field">Title size
+        <input id="rng-title" type="range" min="50" max="160" value="100">
+      </label>
+      <label class="check"><input id="chk-gradient" type="checkbox" checked> Sunset gradient in the title</label>
+      <label class="check"><input id="chk-frame" type="checkbox" checked> White poster frame</label>
+    </div>
+
+    <div class="group">
+      <h2>Selected panel</h2>
+      <label class="field">Zoom
+        <input id="rng-zoom" type="range" min="100" max="300" value="100">
+      </label>
+      <div class="row small">
+        <button id="btn-center" type="button" class="ghost">Centre photo</button>
+        <button id="btn-next-photo" type="button" class="ghost">Next photo in panel</button>
+      </div>
+    </div>
+  </aside>
 </main>
-<script type="module" src="./src/main.js"></script>
+
+<footer class="foot">
+  <span>Neon Vice Cover Studio · original art, lettering and code · photos are read locally and never uploaded</span>
+</footer>
+
+<canvas id="shot-canvas" hidden></canvas>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

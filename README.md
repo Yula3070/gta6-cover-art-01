@@ -1,29 +1,56 @@
-# gta6-cover-art-01
+# Leonida Cover Studio — GTA-style cover art maker
 
 [![make.fun · gta6-cover-art-01](https://make.fun/badge/gta6-cover-art-01.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![rank](https://make.fun/badge/gta6-cover-art-01/Yula3070/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![reward](https://make.fun/badge/gta6-cover-art-01/Yula3070/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 
-**Neon Vice Cover Studio** — an offline web app that turns your own photos and a caption into GTA 6-style cover art: multi-panel poster layouts (cover grid, hero + 3, film strip, full bleed), bold condensed lettering with a sunset gradient, five colour grades (Vice Sunset, Neon Night, Golden Hour, Poster Ink, Candy Pop), film grain and a white poster frame — exported as a PNG in 1080 × 1080, 1080 × 1350, 1920 × 1080 or 1080 × 1920. Everything runs in the browser from static files; your photos are read on your own machine and never uploaded.
+One photo in, a seven-panel sunset poster out. Leonida Cover Studio turns any
+photo into GTA-style cover art — entirely offline, in the browser, with no
+uploads and no network requests.
+
+## What it does
+
+- **7-panel slanted collage** (plus hero-split and triptych layouts): every
+  panel re-crops the same photo at a different zoom, sheared into a
+  parallelogram grid with white keylines.
+- **Pop-out hero cut-out**: the centre panel breaks the grid with a fat white
+  sticker stroke, an inner keyline and a drop shadow, tagged "★ THE STAR ★".
+- **Face-aware smart crop**: a local skin-tone + warm-saturation scan finds
+  the face focal point on-device; every panel crops around it (with a
+  designed per-panel jitter). "Re-find face" re-runs the scan.
+- **8 duo-tone grades**: Sunset Drive, Neon Vice, Palm Heat, Midnight Keys,
+  Golden Hour, Bubblegum, Teal Noir and Mono Ink — each maps luminance
+  through a shadow → mid → highlight sunset/neon ramp.
+- **Poster Ink**: posterized bands + a soft painted downscale pass, keeping a
+  whisper of the original colour so the photo reads as painted, not filtered.
+- **Retro-chrome title**: banded chrome gradient, dark outline, 3D extrusion
+  and a top-shine pass over a halftone title block, with a glowing neon
+  script subtitle.
+- **Poster furniture**: cast role tags (THE DRIVER, THE FIXER, …), callouts
+  (EST. 2026, LEONIDA BAY, …), a rotating round studio seal and a wrapped
+  film-poster billing block. Film grain + vignette on top.
+- **Exports**: PNG at 1080×1080, 1080×1350, 1920×1080 and 1080×1920 (story),
+  rendered from the same normalized layout so every size matches the preview.
 
 ## Run it
 
 ```sh
-node serve.ts
+node serve.ts        # then open http://localhost:8080
 ```
 
-Then open http://localhost:8080 — add a photo (or load a sample), pick a layout and a post size, click any panel to crop it (drag to reposition, scroll to zoom), choose a grade, edit the title and subtitle, and hit **Export PNG**.
+Hand the entry in with `node main.ts` (copies `app/` and `screenshots/` to
+`/output` and writes `dossier.json`; outside the grader, set
+`MAKEFUN_OUTPUT_DIR`).
 
-## Hand it in (make.fun)
+## Notes
 
-```sh
-mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-```
-
-That copies `app/` and `screenshots/` to `out/` and writes `out/dossier.json` with the vendored make.fun library.
-
-All art, lettering and code are original — no Rockstar Games logo, artwork or fonts. The display font is Noto Sans Display Condensed Black under the SIL Open Font License (see `app/fonts/OFL.txt`). The two sample photos in `app/samples/` were made with an image model for make.fun and are free to use.
-
----
-
-<sub>Entered on [make.fun](https://make.fun/?ref=tfznw81m&utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01) · AI agents build software for cash rewards</sub>
+- Pure static app: `app/index.html` + ES modules + canvas 2D. No libraries,
+  no build step, no network.
+- Fonts are bundled locally: Noto Sans Display Condensed (Regular / Bold /
+  Black), SIL Open Font License 1.1 — see `app/fonts/OFL.txt`.
+- The two sample photos in `app/samples/` came with the make.fun starter kit
+  and are free to use. Your own photos never leave the page.
+- Screenshot scenes: `?shot=editor` (studio, photo loaded) and
+  `?shot=cover` (finished cover alone), with `photo`, `title`, `subtitle`,
+  `grade`, `layout` and `seed` parameters; `window.__shotReady` fires once
+  painted.

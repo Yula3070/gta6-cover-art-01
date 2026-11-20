@@ -1,124 +1,78 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Neon Vice Cover Studio — GTA-style cover art maker</title>
+<title>Leonida Cover Studio — GTA-style cover art maker</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <span class="brand-mark">NV</span>
-    <div>
-      <h1>Neon Vice Cover Studio</h1>
-      <p>Turn your photos into GTA-style cover art. Runs fully offline — photos never leave this machine.</p>
-    </div>
-  </div>
-  <div class="top-actions">
-    <button id="btn-random" type="button" class="ghost">Shuffle look</button>
-    <button id="btn-export" type="button" class="primary">Export PNG</button>
-  </div>
-</header>
-
-<main class="layout">
-  <section class="stage-wrap">
-    <div class="stage-head">
-      <span id="stage-label">Live preview</span>
-      <span id="stage-size" class="stage-size">1080 × 1080</span>
-    </div>
-    <div id="stage" class="stage">
-      <canvas id="preview" width="1080" height="1080"></canvas>
-      <div id="drop-hint" class="drop-hint">Drop photos here, or use “Add photos”</div>
-    </div>
-    <p class="stage-tip">Click a panel to select it, drag to reposition the photo, scroll to zoom.</p>
-  </section>
-
-  <aside class="panel">
-    <div class="group">
-      <h2>1 · Photos</h2>
-      <div class="row">
-        <label class="file-btn">
-          Add photos
-          <input id="file-input" type="file" accept="image/*" multiple hidden>
-        </label>
-        <button id="btn-sample-boulevard" type="button" class="ghost">Sample: Boulevard</button>
-        <button id="btn-sample-pier" type="button" class="ghost">Sample: Pier</button>
-      </div>
-      <div id="photo-tray" class="photo-tray"></div>
-      <div class="row small">
-        <button id="btn-fill-all" type="button" class="ghost">Fill every panel with selected photo</button>
-        <button id="btn-spread" type="button" class="ghost">Spread photos across panels</button>
-      </div>
+<main class="studio">
+  <aside class="panel" aria-label="Cover controls">
+    <div class="brand">
+      <span class="brand-kicker">MAKE.FUN · GTA6-COVER-ART-01</span>
+      <h1>Leonida<br>Cover Studio</h1>
+      <p class="tagline">One photo in. A seven-panel sunset poster out — pop-out hero, chrome title, cast tags, seal and billing block. 100% offline, in your browser.</p>
     </div>
 
-    <div class="group">
-      <h2>2 · Layout &amp; size</h2>
-      <label class="field">Panel layout
-        <select id="sel-layout">
-          <option value="grid9">Cover grid — 8 panels + title block</option>
-          <option value="hero3">Hero + 3</option>
-          <option value="quad">Four panels</option>
-          <option value="strip">Film strip — 3 tall panels</option>
-          <option value="duo">Two wide panels</option>
-          <option value="bleed">Full bleed — one photo</option>
-        </select>
-      </label>
-      <label class="field">Post size
-        <select id="sel-size">
-          <option value="square">Square · 1080 × 1080</option>
-          <option value="portrait">Portrait · 1080 × 1350</option>
-          <option value="landscape">Landscape · 1920 × 1080</option>
-          <option value="story">Story · 1080 × 1920</option>
-        </select>
-      </label>
+    <label class="field">Your photo
+      <input id="photo" type="file" accept="image/*">
+      <span class="hint">Or try a sample:
+        <button type="button" class="chip" data-sample="pier">Pier at dusk</button>
+        <button type="button" class="chip" data-sample="boulevard">Boulevard</button>
+      </span>
+    </label>
+
+    <label class="field">Cover title
+      <input id="title" type="text" maxlength="26" value="LEONIDA NIGHTS">
+    </label>
+    <label class="field">Neon subtitle
+      <input id="subtitle" type="text" maxlength="34" value="sunset heist">
+    </label>
+    <label class="field">Billing line (poster credits)
+      <input id="billing" type="text" maxlength="120" value="LEONIDA STUDIO PRESENTS A SUNSET HEIST PICTURE STARRING THE DRIVER THE FIXER AND THE LOOKOUT MUSIC BY PALM RADIO EDITED BY NIGHT SHIFT">
+    </label>
+
+    <label class="field">Duo-tone grade
+      <select id="grade"></select>
+    </label>
+    <label class="field">Layout
+      <select id="layout">
+        <option value="seven" selected>7-panel slanted collage</option>
+        <option value="hero">Hero split — big pop-out</option>
+        <option value="triptych">Triptych strips</option>
+      </select>
+    </label>
+
+    <div class="toggles">
+      <label><input id="ink" type="checkbox" checked> Poster Ink (painted look)</label>
+      <label><input id="tags" type="checkbox" checked> Cast tags &amp; callouts</label>
+      <label><input id="grain" type="checkbox" checked> Film grain &amp; vignette</label>
     </div>
 
-    <div class="group">
-      <h2>3 · Colour grade</h2>
-      <div id="grade-row" class="grade-row"></div>
-      <label class="field">Grade strength
-        <input id="rng-grade" type="range" min="0" max="100" value="80">
-      </label>
-      <label class="field">Film grain
-        <input id="rng-grain" type="range" min="0" max="100" value="35">
-      </label>
+    <div class="row">
+      <button id="shuffle" type="button" class="ghost">Shuffle crops</button>
+      <button id="focus" type="button" class="ghost">Re-find face</button>
     </div>
+    <p id="focusnote" class="hint" role="status"></p>
 
-    <div class="group">
-      <h2>4 · Lettering</h2>
-      <label class="field">Title
-        <input id="txt-title" type="text" value="NEON VICE" maxlength="28">
-      </label>
-      <label class="field">Subtitle
-        <input id="txt-subtitle" type="text" value="a cover story" maxlength="40">
-      </label>
-      <label class="field">Title size
-        <input id="rng-title" type="range" min="50" max="160" value="100">
-      </label>
-      <label class="check"><input id="chk-gradient" type="checkbox" checked> Sunset gradient in the title</label>
-      <label class="check"><input id="chk-frame" type="checkbox" checked> White poster frame</label>
-    </div>
-
-    <div class="group">
-      <h2>Selected panel</h2>
-      <label class="field">Zoom
-        <input id="rng-zoom" type="range" min="100" max="300" value="100">
-      </label>
-      <div class="row small">
-        <button id="btn-center" type="button" class="ghost">Centre photo</button>
-        <button id="btn-next-photo" type="button" class="ghost">Next photo in panel</button>
-      </div>
-    </div>
+    <fieldset class="exports">
+      <legend>Export PNG</legend>
+      <button type="button" data-export="1080x1080">Square 1080×1080</button>
+      <button type="button" data-export="1080x1350">Portrait 1080×1350</button>
+      <button type="button" data-export="1920x1080">Wide 1920×1080</button>
+      <button type="button" data-export="1080x1920">Story 1080×1920</button>
+    </fieldset>
+    <p id="status" role="status"></p>
+    <p class="fineprint">Face-aware crop runs locally on your photo — nothing leaves this page. Fonts: Noto Sans Display (SIL OFL 1.1, bundled).</p>
   </aside>
+
+  <section class="stage" aria-label="Cover preview">
+    <canvas id="cover" width="1080" height="1080" aria-label="Your cover art preview"></canvas>
+    <p class="stage-note">Live preview · the export buttons render the same art at full size.</p>
+  </section>
 </main>
-
-<footer class="foot">
-  <span>Neon Vice Cover Studio · original art, lettering and code · photos are read locally and never uploaded</span>
-</footer>
-
-<canvas id="shot-canvas" hidden></canvas>
-<script type="module" src="src/main.js"></script>
+<script type="module" src="./src/main.js"></script>
 </body>
 </html>
